@@ -3,10 +3,10 @@ import { doSomething, ILogger, setLogger } from "./jest-test";
 
 // ------------------------------------------------------------------------------------------------
 
-describe("doSomething()", () => {
+describe("jest-test", () => {
   let loggerMock: ILogger;
 
-  describe("addGracefulShutdown()", () => {
+  describe("doSomething()", () => {
     beforeEach(() => {
       loggerMock = {
         info: jest.fn(),
@@ -18,7 +18,7 @@ describe("doSomething()", () => {
       setLogger(loggerMock);
     });
 
-    it("should call httpShutdown", () => {
+    it("should do something good", () => {
       // arrage
       const expected = 12345;
 
