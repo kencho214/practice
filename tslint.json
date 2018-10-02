@@ -1,0 +1,25 @@
+{
+  "defaultSeverity": "error",
+  "extends": [
+    "tslint:recommended"
+  ],
+  "jsRules": {},
+  "rules": {
+    "max-line-length": false,
+    "max-classes-per-file": false,
+    "ordered-imports": false,
+    "object-literal-sort-keys": false,
+    "no-empty": false,
+    "interface-name": false,
+    "member-ordering": false,
+    "no-console": false,
+    "rxjs-collapse-imports": true,
+    "rxjs-pipeable-operators-only": true,
+    "rxjs-no-static-observable-methods": true,
+    "rxjs-proper-imports": true
+  },
+  "rulesDirectory": [
+    "node_modules/tslint-eslint-rules/dist/rules",
+    "node_modules/rxjs-tslint"
+  ]
+}

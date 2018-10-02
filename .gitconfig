@@ -1,0 +1,9 @@
+[core]
+  ignorecase = false
+  hooksPath = .githooks
+[merge]
+  ff = false
+[pull]
+  ff = only
+[commit]
+  template = .gittemplate
