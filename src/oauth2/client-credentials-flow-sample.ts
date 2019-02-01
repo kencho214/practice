@@ -2,14 +2,12 @@
 
 import { RxHR as client } from "@akanass/rx-http-request";
 import { Observable, Subject, ReplaySubject, of } from "rxjs";
-import { delay, switchMap, map, catchError } from "rxjs/operators";
+import { delay, switchMap, map } from "rxjs/operators";
 
 // ------------------------------------------------------
 
 export interface Token {
   access_token: string;
-  id_token: string;
-  refresh_token: string;
   token_type: string;
   expires_in: number;
 }
@@ -25,20 +23,14 @@ export interface EndpointInfo {
 }
 
 export interface GetTokenOpts {
-  username: string;
-  password: string;
   scope: string;
 }
 
-export interface RefreshTokenOpts {
-  refresh_token: string;
-}
-
 /**
- * Continue refresh token after start.
- * OAuth2 password flow
+ * Continue get token after start.
+ * OAuth2 client credentials flow
  */
-export class OAuth2PasswordFlow {
+export class OAuth2ClientCredentialsFlow {
   public readonly token$: Subject<Token> = new ReplaySubject(1);
   public token?: Token;
 
@@ -48,21 +40,18 @@ export class OAuth2PasswordFlow {
     this.token$
       .pipe(
         switchMap((token) => of(token).pipe(delay((token.expires_in - 60) * 1000))),
-        switchMap((token) => OAuth2PasswordFlow.refreshToken$({ ...this.creds, ...token }).pipe(
-          catchError((e) => OAuth2PasswordFlow.getToken$({ ...this.creds, ...opts })),
-        )),
+        switchMap((token) => OAuth2ClientCredentialsFlow.getToken$({ ...this.creds, ...opts })),
       )
       .subscribe((token) => {
         this.token = token;
         this.token$.next(token);
       });
 
-    OAuth2PasswordFlow.getToken$({ ...this.creds, ...opts }).subscribe(
-      (token) => {
+    OAuth2ClientCredentialsFlow.getToken$({ ...this.creds, ...opts })
+      .subscribe((token) => {
         this.token = token;
         this.token$.next(token);
-      },
-    );
+      });
 
     return this.token$;
   }
@@ -84,24 +73,11 @@ export class OAuth2PasswordFlow {
     return headers;
   }
 
-  public static refreshToken$(opts: EndpointInfo & RefreshTokenOpts): Observable<Token> {
-    const headers = OAuth2PasswordFlow.getHeaders(opts.basicAuth);
-
-    const body = {
-      grant_type: "refresh_token",
-      refresh_token: opts.refresh_token,
-    };
-
-    return client.post(opts.tokenEndpoint, { headers, json: true, body }).pipe(map((res) => res.body));
-  }
-
   public static getToken$(opts: EndpointInfo & GetTokenOpts): Observable<Token> {
-    const headers = OAuth2PasswordFlow.getHeaders(opts.basicAuth);
+    const headers = OAuth2ClientCredentialsFlow.getHeaders(opts.basicAuth);
 
     const body = {
-      grant_type: "password",
-      username: opts.username,
-      password: opts.password,
+      grant_type: "client_credentials",
       scope: opts.scope,
     };
 
